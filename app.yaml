@@ -1,0 +1,11 @@
+runtime: go
+env: flex
+
+automatic_scaling:
+  min_num_instances: 1
+
+#[START gae_flex_pubsub_yaml]
+env_variables:
+  PUBSUB_TOPIC: "Hopes_and_Dreams"
+  PUBSUB_VERIFICATION_TOKEN: "1234"
+#[END gae_flex_pubsub_yaml]
