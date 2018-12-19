@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 
@@ -23,9 +22,9 @@ type PullData struct {
 	SubName string `json:"subname"`
 }
 
-func CheckError(msg string, err error) {
+func CheckError(w http.ResponseWriter, msg string, err error) {
 	if err != nil {
-		log.Fatalf("%s: %v", msg, err)
+		fmt.Fprintf(w, "%s: %v", msg, err)
 	}
 }
 
@@ -55,14 +54,14 @@ func CorsHandler(w http.ResponseWriter) {
 // HandleCreate create new topic
 func HandleCreate(w http.ResponseWriter, r *http.Request) {
 	CorsHandler(w)
-	fmt.Println("Handle Create")
 	ctx := context.Background()
 
 	projectID := GetEnvVar("GOOGLE_CLOUD_PROJECT")
-	fmt.Println("ProjectID", projectID)
 	client, err := pubsub.NewClient(ctx, projectID)
-	t, err := client.CreateTopic(ctx, "top3")
-	CheckError("Error Creating topic", err)
+	CheckError(w, "Error Creating Client", err)
+	newctx := context.Background()
+	t, err := client.CreateTopic(newctx, "top3")
+	CheckError(w, "Error Creating topic", err)
 
 	fmt.Fprintf(w, "Topic Created Successfully %s", t)
 }
@@ -76,13 +75,13 @@ func HandlePublish(w http.ResponseWriter, r *http.Request) {
 	projectID := GetEnvVar("GOOGLE_CLOUD_PROJECT")
 
 	client, err := pubsub.NewClient(ctx, projectID)
-	CheckError("Error creating pubsub client", err)
+	CheckError(w, "Error creating pubsub client", err)
 
 	body, err := ioutil.ReadAll(r.Body)
-	CheckError("Error parsing request body", err)
+	CheckError(w, "Error parsing request body", err)
 
 	err = json.Unmarshal(body, &PubData)
-	CheckError("Error Unmarshalling Data", err)
+	CheckError(w, "Error Unmarshalling Data", err)
 
 	t := client.Topic(PubData.Topic)
 
@@ -91,7 +90,7 @@ func HandlePublish(w http.ResponseWriter, r *http.Request) {
 		Data: []byte(PubData.Message),
 	})
 	id, err := result.Get(ctx)
-	CheckError("Error getting ID", err)
+	CheckError(w, "Error getting ID", err)
 
 	fmt.Fprintf(w, "Published %s", id)
 }
@@ -107,13 +106,13 @@ func HandlePull(w http.ResponseWriter, r *http.Request) {
 	cctx, cancel := context.WithCancel(ctx)
 
 	client, err := pubsub.NewClient(ctx, projectID)
-	CheckError("Error creating pubsub client", err)
+	CheckError(w, "Error creating pubsub client", err)
 
 	body, err := ioutil.ReadAll(r.Body)
-	CheckError("Error parsing request body", err)
+	CheckError(w, "Error parsing request body", err)
 
 	err = json.Unmarshal(body, &Puller)
-	CheckError("Error Unmarshalling Data", err)
+	CheckError(w, "Error Unmarshalling Data", err)
 
 	sub := client.Subscription(Puller.SubName)
 	err = sub.Receive(cctx, func(ctx context.Context, msg *pubsub.Message) {

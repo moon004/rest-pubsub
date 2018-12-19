@@ -6,10 +6,10 @@ RUN apk add build-base
 RUN mkdir /build
 ADD . /build/
 WORKDIR /build
-RUN go env
-RUN go build -o main .
+RUN go env && export GO111MODULE=on
+RUN go build -mod=vendor -v -o main .
 FROM alpine
 COPY --from=builder /build/main /app/
 WORKDIR /app
-RUN ls -a
+VOLUME "/google-key"
 CMD ["./main"]
