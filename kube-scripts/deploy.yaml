@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pubsub
+spec:
+  selector:
+    matchLabels:
+      app: pubsub
+  template:
+    metadata:
+      labels:
+        app: pubsub
+    spec:
+      volumes:
+      - name: google-cloud-key
+        secret:
+          secretName: my-google-secret
+      containers:
+      - name: pubsublib-container
+        image: gcr.io/%PROJECT_ID%/gopubsub:v6
+        volumeMounts:
+        - name: google-cloud-key
+          mountPath: /google-key
+        env:
+        - name: GOOGLE_CLOUD_PROJECT
+          value: "%PROJECT_ID%"
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /google-key/key.json

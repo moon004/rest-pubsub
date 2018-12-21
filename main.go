@@ -37,6 +37,12 @@ func main() {
 		log.Panicf("Logging err: %s\n", err.Error())
 	}
 
+	proj := os.Getenv("GOOGLE_CLOUD_PROJECT")
+	if proj == "" {
+		fmt.Fprintf(os.Stderr, "GOOGLE_CLOUD_PROJECT environment variable must be set.\n")
+		os.Exit(1)
+	}
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"

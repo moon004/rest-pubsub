@@ -1,0 +1,13 @@
+version: '2'
+
+services:
+  pubsub-service:
+    build: .
+    image: gcr.io/%PROJECT_ID%/gopubsub:v7
+    volumes:
+      - ./google-key:/google-key/
+    ports:
+      - 80:8080
+    environment:
+      - GOOGLE_CLOUD_PROJECT=%PROJECT_ID%
+      - GOOGLE_APPLICATION_CREDENTIALS=/google-key/key.json

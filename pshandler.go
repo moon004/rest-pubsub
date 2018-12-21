@@ -23,6 +23,7 @@ type PullData struct {
 }
 
 func CheckError(w http.ResponseWriter, msg string, err error) {
+	fmt.Printf("%s: %v \n", msg, err)
 	if err != nil {
 		fmt.Fprintf(w, "%s: %v", msg, err)
 	}
@@ -59,10 +60,8 @@ func HandleCreate(w http.ResponseWriter, r *http.Request) {
 	projectID := GetEnvVar("GOOGLE_CLOUD_PROJECT")
 	client, err := pubsub.NewClient(ctx, projectID)
 	CheckError(w, "Error Creating Client", err)
-	newctx := context.Background()
-	t, err := client.CreateTopic(newctx, "top3")
+	t, err := client.CreateTopic(ctx, "top3")
 	CheckError(w, "Error Creating topic", err)
-
 	fmt.Fprintf(w, "Topic Created Successfully %s", t)
 }
 
